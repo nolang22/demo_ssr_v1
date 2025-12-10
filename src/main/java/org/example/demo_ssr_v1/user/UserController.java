@@ -6,11 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class UserController {
 
-    @GetMapping("/")
-    public String index() {
-        return "index";
-    }
-
     // http://localhost:8080/join-form
     @GetMapping("/join-form")
     public String joinForm() {
