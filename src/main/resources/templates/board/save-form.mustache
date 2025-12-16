@@ -1,4 +1,5 @@
-{{> layout/header }}
+{{> layout/header}}
+
 <div class="container p-5">
     <div class="card">
         <div class="card-header"><b>글쓰기 화면입니다</b></div>
@@ -11,11 +12,8 @@
             <form action="/board/save" method="post">
                 <!--
                 name 속성: 서버에서 받을 때 사용하는 변수명
-                name="username" → 컨트롤러에서 String username 으로 받음
+                name="username" → 컨트롤러에서 String username으로 받음
                 -->
-                <div class="mb-3">
-                    <input type="text" class="form-control" placeholder="Enter username" name="username">
-                </div>
                 <div class="mb-3">
                     <input type="text" class="form-control" placeholder="Enter title" name="title">
                 </div>
@@ -29,4 +27,5 @@
         </div>
     </div>
 </div>
-{{> layout/footer }}
+
+{{> layout/footer}}
