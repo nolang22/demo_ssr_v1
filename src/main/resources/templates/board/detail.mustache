@@ -3,16 +3,17 @@
 <div class="container p-5">
 
     <!-- 수정삭제버튼 -->
+    {{#isOwner}}
     <div class="d-flex justify-content-end">
         <!-- form 수정해 주세요  -->
         <form action="/board/{{board.id}}/delete" method="post">
             <button class="btn btn-danger">삭제</button>
         </form>
         <a href="/board/{{board.id}}/update"  class="btn btn-warning me-1">수정</a>
-
     </div>
+    {{/isOwner}}
     <div class="d-flex justify-content-end">
-        <b>작성자</b> : {{board.user.username}}
+        <b>작성자</b> : {{board.username}}
     </div>
 
     <!-- 게시글내용 -->

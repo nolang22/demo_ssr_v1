@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     // 회원가입 화면 요청
     // http://localhost:8080/join
@@ -40,13 +40,10 @@ public class UserController {
         // 4. 저장 요청
         joinDTO.validate();
 
-        Optional<User> existingUser = userRepository.findByUsername(joinDTO.getUsername());
+        User existingUser = userService.회원가입(joinDTO);
         if (existingUser != null) {
             throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
         }
-
-        User user = joinDTO.toEntity();
-        userRepository.save(user);
 
         return "redirect:/login";
     }
@@ -69,15 +66,8 @@ public class UserController {
         //      다음 번 요청이 오더라도 알 수 있음 - 세션 저장 처리
         try {
             loginDTO.validate();
-            Optional<User> sessionUser = userRepository.findByUsernameAndPassword(
-                    loginDTO.getUsername(),
-                    loginDTO.getPassword());
+            User sessionUser = userService.로그인(loginDTO);
 
-            if (sessionUser == null) {
-                throw new IllegalArgumentException("사용자명 또는 비밀번호가 올바르지 않습니다.");
-            }
-
-            //
             // 세션에 저장
             session.setAttribute("sessionUser", sessionUser);
 
@@ -105,14 +95,7 @@ public class UserController {
 
         // 2. 인가 처리
         // 게션의 사용자 ID로 화원 정보 조회
-        User user = userRepository.findById(sessionUser.getId());
-        if (user == null) {
-            throw new Exception404("사용자를 찾을 수 없습니다.");
-        }
-
-        if (!user.isOwner(sessionUser.getId())) {
-            throw new Exception403("회원 정보 수정 권한이 없습니다.");
-        }
+        User user = userService.회원정보수정화면(sessionUser.getId());
 
         model.addAttribute("user", user);
 
@@ -126,24 +109,15 @@ public class UserController {
         User sessionUser = (User) session.getAttribute("sessionUser");
         // LoginInterceptor 가 알아서 처리 해줌 !!
 
-        // 인가 처리 (DB 정보 조회)
-        User user = userRepository.findById(sessionUser.getId());
-        if (user == null) {
-            throw new Exception404("사용자를 찾을 수 없습니다");
-        }
-
-        if (!user.isOwner(sessionUser.getId())) {
-            throw new Exception403("회원 정보 수정 권한이 없습니다.");
-        }
-
         // 2. 유효성 검사
         // 3. 세션 메모리에 있던 기존 상태값을 변경 처리
         try {
             updateDTO.validate();
-            User updateUser = userRepository.updateById(sessionUser.getId(), updateDTO);
+            User updateUser = userService.회원정보수정(updateDTO, sessionUser.getId());
+            // 회원 정보 수정은 - 세션 갱신해 주어야 한다.
             session.setAttribute("sessionUser", updateUser);
             // 수정 후 리다이렉트 처리 - 게시판 목록으로 이동
-            return "redirect:/user/update";
+            return "redirect:/board/list";
         } catch (Exception e) {
             return "user/update-form";
         }

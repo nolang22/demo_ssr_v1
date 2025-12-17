@@ -17,9 +17,9 @@ public class UserResponse {
         private String email;
 
         public UpdateFormDTO(User user) {
-            this.id = id;
-            this.username = username;
-            this.email = email;
+            this.id = user.getId();
+            this.username = user.getUsername();
+            this.email = user.getEmail();
         }
     }
 
