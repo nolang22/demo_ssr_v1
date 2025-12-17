@@ -20,8 +20,8 @@ public class ReplyController {
      * @param session
      * @return
      */
-    @PostMapping("/board/{boardId}/reply/save")
-    public String saveProc(@PathVariable Long boardId, ReplyRequest.SaveDTO saveDTO, HttpSession session) {
+    @PostMapping("/reply/save")
+    public String saveProc(ReplyRequest.SaveDTO saveDTO, HttpSession session) {
         User sessionUser = (User) session.getAttribute("sessionUser");
         saveDTO.validate();
         replyService.댓글작성(saveDTO, sessionUser.getId());

@@ -1,5 +1,6 @@
 package org.example.demo_ssr_v1.reply;
 
+import org.example.demo_ssr_v1.board.Board;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,7 +26,7 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             "JOIN FETCH r.board\n" +
             "JOIN FETCH r.user\n" +
             "WHERE r.board.id = :boardId\n" +
-            "ORDER BY r.createdAt DESC ")
+            "ORDER BY r.createdAt ASC ")
     List<Reply> findByBoardIdWithUser(@Param("boardId") Long boardId);
 
     // 댓글 ID로 조회 (작성자 정보도 포함, JOIN FETCH 사용)
@@ -38,4 +39,6 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
     // 게시글 ID로 댓글 삭제
 
     void deleteByBoardId(Long boardId);
+
+    Long board(Board board);
 }

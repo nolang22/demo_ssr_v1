@@ -7,11 +7,10 @@ import org.example.demo_ssr_v1._core.errors.exception.Exception403;
 import org.example.demo_ssr_v1.reply.ReplyResponse;
 import org.example.demo_ssr_v1.reply.ReplyService;
 import org.example.demo_ssr_v1.user.User;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -76,20 +75,44 @@ public class BoardController {
     }
 
     /**
-     * 게시글 목록 화면 요청
+     * 게시글 목록 페이징 처리 기능 추가
+     *
+     * @param model
+     * @return
+     * // 예시: /board/list?page=1&size=5
+     */
+    // http://localhost:8080/board/list
+    @GetMapping("/board/list")
+    public String boardList(Model model,
+                                                 @RequestParam(defaultValue = "1") int page,
+                                                 @RequestParam(defaultValue = "1") int size
+    ) {
+        // 1. 페이지 번호 변환 : 사용자는 1부터 시작하는 페이지 번호를 사용하지만
+        //    Spring의 pageable은 0부터 시작하므로 1을 빼서 변환 해야 한다.
+        //                          - 1000
+        int pageIndex = Math.max(0, page - 1);
+        // Size = 5 (일단 고정) - 한 페이지에 보여야 할 개수
+        BoardResponse.PageDTO boardPage = boardService.게시글목록조회(pageIndex, size);
+        model.addAttribute("boardPage", boardPage);
+
+        return "board/list";
+    }
+
+    /**
+     * TODO - 삭제 예정
      *
      * @param model
      * @return
      */
     // http://localhost:8080/board/list
-    @GetMapping("/board/list")
-    public String boardList(Model model) {
-
-        List<BoardResponse.ListDTO> boardList = boardService.게시글목록조회();
-        model.addAttribute("boardList", boardList);
-
-        return "board/list";
-    }
+//    @GetMapping("/board/list")
+//    public String boardList(Model model) {
+//
+//        List<BoardResponse.ListDTO> boardList = boardService.게시글목록조회();
+//        model.addAttribute("boardList", boardList);
+//
+//        return "board/list";
+//    }
 
     /**
      * 게시글 작성 화면 오청
