@@ -25,14 +25,14 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             "JOIN FETCH r.board\n" +
             "JOIN FETCH r.user\n" +
             "WHERE r.board.id = :boardId\n" +
-            "ORDER BY r.createdAt ASC")
+            "ORDER BY r.createdAt DESC ")
     List<Reply> findByBoardIdWithUser(@Param("boardId") Long boardId);
 
     // 댓글 ID로 조회 (작성자 정보도 포함, JOIN FETCH 사용)
     @Query("SELECT r FROM Reply r " +
             "JOIN FETCH r.user JOIN FETCH r.board " +
             "WHERE r.id = :id")
-    Optional<Reply> finByIdWithUser(@Param("id") Long id);
+    Optional<Reply> findByIdWithUser(@Param("id") Long id);
 
     // 댓글 삭제 -> 네임드 쿼리로 만들어 보세요
     // 게시글 ID로 댓글 삭제

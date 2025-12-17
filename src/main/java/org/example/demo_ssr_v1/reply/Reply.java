@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1.board.Board;
 import org.example.demo_ssr_v1.user.User;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
 
@@ -33,6 +35,7 @@ public class Reply {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @CreationTimestamp
     private Timestamp createdAt;
 
     @Builder

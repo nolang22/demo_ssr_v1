@@ -17,7 +17,6 @@ public class MyExceptionHandler {
 
     // 내가 지켜볼 예외를 명시를 해주면 controllerAdvice가 가지고와 처리 함
     @ExceptionHandler(Exception400.class)
-    @ResponseBody
     public String ex400(Exception400 e, HttpServletRequest request) {
         log.warn("== 400 에러 발생 ==");
         log.warn("요청 URL: {}", request.getRequestURL());
@@ -55,8 +54,8 @@ public class MyExceptionHandler {
 //        return "err/403";
 //    }
 
-    @ResponseBody
     @ExceptionHandler(Exception403.class)
+    @ResponseBody
     public ResponseEntity<String> ex403(Exception403 e, HttpServletRequest request) {
 
         String script = "<script>alert('"+e.getMessage()+"');" +
