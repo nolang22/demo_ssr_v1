@@ -41,9 +41,6 @@ public class UserController {
         joinDTO.validate();
 
         User existingUser = userService.회원가입(joinDTO);
-        if (existingUser != null) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다.");
-        }
 
         return "redirect:/login";
     }
