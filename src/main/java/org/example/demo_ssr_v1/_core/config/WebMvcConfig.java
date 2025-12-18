@@ -2,6 +2,7 @@ package org.example.demo_ssr_v1._core.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.interceptor.LoginInterceptor;
+import org.example.demo_ssr_v1._core.interceptor.SessionInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -19,6 +20,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     // DI 처리
     private final LoginInterceptor loginInterceptor;
+    private final SessionInterceptor sessionInterceptor;
 
     // DI 처리 (생성자 의존 주입 받음)
 //    public WebMvcConfig(LoginInterceptor loginInterceptor) {
@@ -29,6 +31,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
     // ps. 인터셉터는 당연히 여러개 등록 가능 함...
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(sessionInterceptor)
+                .addPathPatterns("/**");
 
         // 1. 설정에 LoginInterceptor 를 등록하는 코드
         // 2. 인터셉터가 동작할 URL 패턴 지정
