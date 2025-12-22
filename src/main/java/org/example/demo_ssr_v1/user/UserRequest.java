@@ -62,16 +62,18 @@ public class UserRequest {
     @Data
     public static class UpdateDTO {
         private String password;
-        // username은 제외: 변경 불가능한 고유 식별자
+        private MultipartFile profileImage; // form 에 name속성 이름과 동일해야 함
+        private String profileImageFilename; // 추후  user.update 메서드에서 사용 함
+
+        // username 은 제외: 변경 불가는한 고유 식별자
 
         public void validate() {
-
-            if (password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+            if(password == null || password.trim().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호를 입력해주세요");
             }
 
-            if (password.length() < 4) {
-                throw new IllegalArgumentException("비밀번호는 4글자 이상이어야 합니다.");
+            if(password.length() < 4) {
+                throw new IllegalArgumentException("비밀번호는 4글자 이상이어야 합니다");
             }
         }
     }

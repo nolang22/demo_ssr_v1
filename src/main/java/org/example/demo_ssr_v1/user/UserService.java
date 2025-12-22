@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception403;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
+import org.example.demo_ssr_v1._core.errors.exception.Exception500;
 import org.example.demo_ssr_v1._core.utiles.FileUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
 
 // Service --> 응답 DTO 설계 해서 전달 --> Controller
 
@@ -65,7 +69,7 @@ public class UserService {
     public User 로그인(UserRequest.LoginDTO loginDTO) {
 
         // 사용자가 던진 값과 DB에 사용자 이름과 비밀번호를 확인해 주어야 한다.
-        User userEntity = userRepository.findByUsernameAndPassword(loginDTO.getUsername(), loginDTO.getPassword())
+        User userEntity = userRepository.findByUsernameAndPasswordWithRoles(loginDTO.getUsername(), loginDTO.getPassword())
                 .orElse(null); // 로그인 실패시 null 반환
 
         if (userEntity == null) {
@@ -93,17 +97,89 @@ public class UserService {
     // 3. 엔티티 상태 변경 (더티 체킹)
     // 4. 트랜잭션이 일어나고 변경 된 User 엔티티 반환
     @Transactional
-    public User 회원정보수정(UserRequest.UpdateDTO updateDTO, Long userId) {
+    public User 회원정보수정(UserRequest.UpdateDTO updateDTO, Long userId ) {
         User userEntity = userRepository.findById(userId)
-                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
-
-        if (!userEntity.isOwner((userId))) {
-            throw new Exception403("회원 정보 수정 권한이 없습니다.");
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
+        if(!userEntity.isOwner(userId))  {
+            throw new Exception403("회원 정보 수정 권한이 없습니다");
         }
 
-        // 객체 선택값 변경 (트랜잭션이 끝나면 자동으로 commit 및 반영해 줄꺼야
+        // 추가 - 프로필 이미지 처리
+        // 중요 : 우리 프로젝트에서는 이미지 수정도 선택 사항 입니다.
+        // 새로운 이미지 파일을 생성하고 기존에 있던 이미지 파일을 삭제해야 한다
+        // 추가로 DB 정보도 업데이트 해야 한다.
+
+        String oldProfileImage = userEntity.getProfileImage();
+        // 분기 처리 - 이미지명이 있거나 또는 null 값이다.
+        if(updateDTO.getProfileImage() != null && !updateDTO.getProfileImage().isEmpty()) {
+            // 1. 이미지 파일인지 검증
+            if(!FileUtil.isImageFile(updateDTO.getProfileImage())) {
+                throw new Exception400("이미지 파일만 업로드 가능합니다");
+            }
+
+            // 2. 새 이미지 저장
+            try {
+                String newProfileImageFilename = FileUtil.saveFile(updateDTO.getProfileImage());
+                // 새로 만들어진 파일 이름을 잠시 DTO에 보관 함
+                updateDTO.setProfileImageFilename(newProfileImageFilename);
+
+                if(oldProfileImage != null && !oldProfileImage.isEmpty()) {
+                    // 기존에 있던 이미지를 삭제 처리 한다.
+                    FileUtil.deleteFile(oldProfileImage);
+                }
+            } catch (IOException e) {
+                throw new Exception500("파일 저장에 실패했습니다");
+            }
+            // end of 파일이 들어 왔을 때 처리
+        } else {
+            // 새 이미지가 업로드 되지 않았으면 기존 이미지 파일 이름 유지
+            updateDTO.setProfileImageFilename(oldProfileImage);
+        }
+        // 객체 상태값 변경 (트랜잭션이 끝나면 자동으로 commit 및 반영해 줄꺼야)
+
         userEntity.update(updateDTO);
 
         return userEntity;
+    }
+
+    public User 마이페이지(Long sessionUserId) {
+        User user = userRepository.findById(sessionUserId)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        // 인가 처리
+        if (!user.isOwner(sessionUserId)) {
+            throw new Exception403(" 권한이 없습니다.");
+        }
+
+        return user;
+    }
+
+    @Transactional
+    public User 프로필이미지삭제(Long sessionUserId) {
+        // 1. 회원 정보 조회
+        // 2. 회원 정보와 세션 id 값이 같은지 판단 -> 인가 처리
+        // 3. 프로필 이미지가 있다면 삭제 (FileUtil) 헬퍼 클래스 사용 할 예정 (디스크에서 삭제)
+        // 4. DB 에서 프로필 이름 null 로 업데이트 처리
+        User userEntity = userRepository.findById(sessionUserId)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        if (!userEntity.isOwner(sessionUserId)) {
+            throw new Exception403("프로필 이미지 삭제 권한이 없습니다.");
+        }
+
+        String profileImage = userEntity.getProfileImage();
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                FileUtil.deleteFile(profileImage);
+            } catch (IOException e) {
+                System.out.println("프로필 이미지 파일 삭제 실패");
+            }
+        }
+
+        // 객체 상태값 변경 (트랜잭션 끝나는 시점 더티 체킹)
+        userEntity.setProfileImage(null);
+
+        return userEntity;
+
     }
 }

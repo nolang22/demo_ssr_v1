@@ -192,6 +192,7 @@ public class BoardController {
     // http://localhost:8080/board/1/delete
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable Long id, HttpSession session) {
+
         // 1. 인증 처리 (o)
         User sessionUser = (User) session.getAttribute("sessionUser");
         // LoginInterceptor 가 알아서 처리 해줌 !!
