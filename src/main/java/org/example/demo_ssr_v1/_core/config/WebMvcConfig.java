@@ -58,7 +58,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/js/**",
                         "/images/**",
                         "/favicon.io",
-                        "/h2-console/**"
+                        "/h2-console/**",
+                        "/user/kakao"
                 );
                 // \\d+ 는 정규표현식으로 1개 이상의 숫자를 의미한다.
                 // /board/1, board/1234 <-- 허용

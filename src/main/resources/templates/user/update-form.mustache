@@ -11,7 +11,7 @@
         <div class="text-center mb-4">
             {{#user.profileImage}}
             {{!어 src 경로가 /images/ 이네... 스프링에 등록한 리소드 핸들러가 동작 함 }}
-                <img src="/images/{{user.profileImage}}" alt="프로필사진" class="rounded-circle border"
+                <img src="{{user.profilePath}}" alt="프로필사진" class="rounded-circle border"
                      style="width: 200px;height: 200px; object-fit: cover">
             {{/user.profileImage}}
             {{^user.profileImage}}
@@ -29,6 +29,8 @@
             <div class="mb-3">
                 <input type="text" class="form-control" placeholder="Enter username" name="username" value="{{user.username}}">
             </div>
+            {{#user.local}}
+<!--                소셜 로그인 화원 가입자는 비밀번호 수정 불가 처리 해야함 -->
             <div class="mb-3">
                 <input type="password" class="form-control" placeholder="Enter password" name="password" required>
             </div>
@@ -41,6 +43,10 @@
                 <small class="form-text text-muted mt-1">이미지 파일만 업로드 가능합니다(JPG, PNG, GIF)</small>
             </div>
             <button type="submit" class="btn btn-primary form-control">회원정보수정</button>
+            {{/user.local}}
+            <div class="d-grid gap-2 mb-3">
+                <a href="/user/detail" class="btn btn-secondary">목록으로</a>
+            </div>
         </form>
     </div>
 </div>

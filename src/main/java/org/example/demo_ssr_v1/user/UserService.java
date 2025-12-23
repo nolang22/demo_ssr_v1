@@ -1,11 +1,14 @@
 package org.example.demo_ssr_v1.user;
 
+import ch.qos.logback.core.net.server.Client;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception403;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
 import org.example.demo_ssr_v1._core.errors.exception.Exception500;
 import org.example.demo_ssr_v1._core.utiles.FileUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -181,5 +184,15 @@ public class UserService {
 
         return userEntity;
 
+    }
+
+    public User 사용자이름조회(String username) {
+        // 사용자 이름 여부만 조회 하는 기능
+        return userRepository.findByUsername(username)
+                .orElse(null);
+    }
+
+    public void 소셜회원가입(User user) {
+        userRepository.save(user);
     }
 }
