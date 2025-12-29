@@ -82,7 +82,7 @@ public class User {
         updateDTO.validate();
 
         this.password = updateDTO.getPassword();
-        this.profileImage = updateDTO.getProfileImageFilename();
+        this.profileImage = updateDTO.getProfileImageFileName();
 
         // 더티 채킹 (변경 감지)
         // 트랜잭션이 끝나면 자동으로 update 쿼리 진행
@@ -134,12 +134,18 @@ public class User {
         if (this.profileImage == null) {
             return null;
         }
-        // https로 싲가하면 소셜 이미지 URL 그대로 리턴
+        // https로 시작하면 소셜 이미지 URL 그대로 리턴
         if (this.profileImage.startsWith("http")) {
             return this.profileImage;
         }
         // 아니면 (로컬 이미지) 폴더 경로 붙여서 리턴
         return "/images/" + this.profileImage;
+    }
+
+    public boolean isLocal() {
+        // LOCAL -> true
+        // KAKAO -> false
+        return this.provider == OAuthProvider.LOCAL;
     }
 }
 

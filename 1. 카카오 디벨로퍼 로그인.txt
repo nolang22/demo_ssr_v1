@@ -1,0 +1,55 @@
+1. 카카오 디벨로퍼 로그인
+https://developers.kakao.com/docs/latest/ko/kakaologin/common
+
+2. 카카오 제공한 API 서비스들 중 카카오 소셜 로그인 선택
+- 카카오 서버에 (내 어플리케이션 정보를 등록 해주어야 한다.
+
+3. 앱 등록 하기 (카카오 서버)
+
+4. 앱에 플랫폼 키 확인 후 리다이렉트 URI 등록
+클라리언트 키 - 8c82e100e6ca7a7e0b77e730ec4e99d9
+리다렉트 URI - http://localhost:8080/user/kakao
+
+5. 소셜 로그인 이미지 다운로드 받기
+카카오 버튼 리소스를 static 폴더에 저장
+
+6. 동의 항목 구성하기 
+앱 > 제품 설정 > 카카오 로그인 > 일반
+- 카카오 사용 설정 ON
+
+7. 동의항목 설정
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+8. 보안상에 이유로 .env  파일을 생성하고 플러그인 설치
+인텔리제이 - envFiles 플러그인 설치
+root 프로젝트 폴더 아래 .env 파일 생성
+
+9. 프로그램 실행 시점에 .env 파일ㅇ르 실행 시킬 수  있도록 설정 해야 한다.( .env 파일 활성화)
+
+10. git에 .env 파일을 올리면 안됨 (gitignore)
+
+11. 카카오 클라이언트 키, 나의 시크릿 키 출력 확인
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+12. 인가 코드 요청 주소
+- https://kauth.kakao.com/oauth/authorize
+https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=8c82e100e6ca7a7e0b77e730ec4e99d9&redirect_uri=http://localhost:8080/user/kakao
+
+13. 인가코드를 받을 URI 설계 /user/kakao 하고 로그인 인터셉터 제외 설정
+
+14. 토큰 요청
+POST 방식
+https://kauth.kakao.com/oauth/token
+
+
+
+
+
+
+
+
+
+
+
+
+
+

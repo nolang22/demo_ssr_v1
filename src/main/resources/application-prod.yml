@@ -10,6 +10,11 @@ spring:
 server:
   port: 8080
 
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+
 logging:
   level:
     org.springframework.web: DEBUG

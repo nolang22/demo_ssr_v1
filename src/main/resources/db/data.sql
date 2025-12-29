@@ -1,3 +1,4 @@
+
 -- User 테이블 데이터 (5명의 사용자)
 INSERT INTO user_tb (username, password, email, created_at) VALUES
                                                                 ('admin', '1234', 'admin@blog.com', NOW()),
@@ -103,4 +104,3 @@ INSERT INTO reply_tb (comment, board_id, user_id, created_at) VALUES
                                                                   ('가성비 좋은 곳 추천해주셔서 고마워요.', 10, 2, NOW()),
                                                                   ('저도 가봐야겠네요. 위치 정보도 알려주세요.', 10, 3, NOW()),
                                                                   ('점심 메뉴 추천도 해주시면 좋을 것 같아요.', 10, 4, NOW());
-

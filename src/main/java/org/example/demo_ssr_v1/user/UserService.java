@@ -1,7 +1,5 @@
 package org.example.demo_ssr_v1.user;
 
-import ch.qos.logback.core.net.server.Client;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception403;
@@ -9,10 +7,17 @@ import org.example.demo_ssr_v1._core.errors.exception.Exception404;
 import org.example.demo_ssr_v1._core.errors.exception.Exception500;
 import org.example.demo_ssr_v1._core.utiles.FileUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
 import java.io.IOException;
 
 // Service --> 응답 DTO 설계 해서 전달 --> Controller
@@ -34,6 +39,115 @@ public class UserService {
     // 객체 지향 개념 --> SOLID 원칙
     // DIP - 추상화가 높은 녀석을 선언하는 것이 좋다.
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value("${oauth.kakao.client-id}")
+    private String clientId;
+    @Value("${tenco.key}")
+    private String tencoKey;
+
+
+    public User 카카오소셜로그인(String code) {
+        // 1. 인가 코드로 액세스 토큰 발급
+        UserResponse.OAuthToken oAuthToken = 카카오액세스토큰발급(code);
+
+        // 2. 액세스 토큰으로 프로필 정보 조회
+        UserResponse.KakaoProfile kakaoProfile = 카카오프로필조회(oAuthToken.getAccessToken());
+
+        // 3. 프로필 정보로 사용자 생성 또는 조회
+        User user = 카카오사용자생성또는조회(kakaoProfile);
+
+        // 4 컨트롤러 단으로 user 반환
+        return user;
+    }
+
+    /**
+     * 카카오 인가 코드로 액세트 토큰 발습
+     *
+     * @param code 카카오 인가 코드
+     * @return Oauth 엑세스 토큰 정보
+     */
+    private UserResponse.OAuthToken 카카오액세스토큰발급(String code) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.add("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
+        tokenParams.add("grant_type", "authorization_code");
+        tokenParams.add("client_id", "a29c279811318c09b37aeaeb8319024e");
+        tokenParams.add("redirect_uri", "http://localhost:8080/user/kakao");
+        tokenParams.add("code", code);
+
+        // TODO - env 파일에 옮겨야 함 시크릿 키 추가(노출 금지)
+        tokenParams.add("client_secret", "n7hkiBQavVDqL9F5rRMkLnfsS5b1usn4");
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams, tokenHeaders);
+        ResponseEntity<UserResponse.OAuthToken> tokenResponse = restTemplate.exchange(
+                "https://kauth.kakao.com/oauth/token",
+                HttpMethod.POST,
+                tokenRequest,
+                UserResponse.OAuthToken.class);
+
+        UserResponse.OAuthToken oAuthToken = tokenResponse.getBody();
+        return oAuthToken;
+    }
+
+    /**
+     * 카카오 액세트 토큰으로 프로필 정보 조회
+     * @param accessToken 카카오 액세스 토큰
+     * @return kakaoProfile 카카오 프로필 정보
+     */
+    private UserResponse.KakaoProfile 카카오프로필조회(String accessToken) {
+
+        RestTemplate profileRt = new RestTemplate();
+
+        HttpHeaders profileHeaders = new HttpHeaders();
+
+        profileHeaders.add("Authorization",
+                "Bearer " + accessToken);
+        profileHeaders.add("Content-Type",
+                "application/x-www-form-urlencoded;charset=utf-8");
+
+        HttpEntity<Void> profileRequest = new HttpEntity<>(profileHeaders);
+
+        ResponseEntity<UserResponse.KakaoProfile> profileResponse =
+                profileRt.exchange(
+                        "https://kapi.kakao.com/v2/user/me",
+                        HttpMethod.POST,
+                        profileRequest,
+                        UserResponse.KakaoProfile.class);
+
+        UserResponse.KakaoProfile kakaoProfile = profileResponse.getBody();
+        return kakaoProfile;
+    }
+
+    private User 카카오사용자생성또는조회(UserResponse.KakaoProfile kakaoProfile) {
+
+        String username = kakaoProfile.getProperties().getNickname()
+                + "_" + kakaoProfile.getId();
+        User userOrigin = 사용자이름조회(username);
+
+        if(userOrigin == null) {
+            User newUser = User.builder()
+                    .username(username)
+                    .password(passwordEncoder.encode(tencoKey)) // 소셜 로그인은 임시 비밀번호로 설정 한다.
+                    .email(username + "@kakao.com") // 선택 사항 (카카오 이메일 비즈니스 앱 신청)
+                    .provider(OAuthProvider.KAKAO)
+                    .build();
+
+            String profileImage = kakaoProfile.getProperties().getProfileImage();
+            if (profileImage != null && !profileImage.isEmpty()) {
+                newUser.setProfileImage(profileImage); // 카카오에서 넘겨 받은 URL 그대로 저장
+            }
+
+            소셜회원가입(newUser);
+            userOrigin = newUser; // 필수 !
+        }
+        return userOrigin;
+    }
+
 
     @Transactional
     public User 회원가입(UserRequest.JoinDTO joinDTO) {
@@ -41,15 +155,17 @@ public class UserService {
 
         // 1. 사용자명 중복 체크
         if (userRepository.findByUsername(joinDTO.getUsername()).isPresent()) {
-            // IsPresent -> 있으면 true 변환, 없으면 false 반환
-            throw new Exception400("이미 존재하는 사용자 입니다.");
+            // isPresent -> 있으면 true 반환 , 없으면 false 반환
+            throw new Exception400("이미 존재하는 사용자 이름입니다");
         }
 
         // User 엔티티에 저장할 때는 String 이어야 하고 null 값도 가질 수 있음
         String profileImageFileName = null;
 
         // 2. 회원 가입시 파일이 넘어 왔는지 확인
-        if (joinDTO.getProfileImage() != null) {
+        // TODO - 수정 해야 함.
+        // MultipartFile (기본적으로 null이 넘어올 수 도 "" 공백으로 들어 올 수 있음)
+        if (joinDTO.getProfileImage() != null && !joinDTO.getProfileImage().isEmpty()) {
 
             // 2.1 유효성 검사 (이미지 파일 이어야 함)
             try {
@@ -63,7 +179,10 @@ public class UserService {
             }
         }
 
+        // 해싱 --> 해시값을 만들어 줌...
+        String hashPwd = passwordEncoder.encode(joinDTO.getPassword());
         User user = joinDTO.toEntity(profileImageFileName);
+        user.setPassword(hashPwd);
 
         return userRepository.save(user);
     }
@@ -72,13 +191,19 @@ public class UserService {
     public User 로그인(UserRequest.LoginDTO loginDTO) {
 
         // 사용자가 던진 값과 DB에 사용자 이름과 비밀번호를 확인해 주어야 한다.
-        User userEntity = userRepository.findByUsernameAndPasswordWithRoles(loginDTO.getUsername(), loginDTO.getPassword())
+        User userEntity = userRepository.findByUsernameWithRoles(loginDTO.getUsername())
                 .orElse(null); // 로그인 실패시 null 반환
 
         if (userEntity == null) {
-            throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다");
+            throw new Exception400("사용자가 존재 하지 않습니다");
         }
 
+        // 비밀번호 검증 (BCrypt matches 메서드를 사용해서 비교 하면 된다)
+        // 일치하면 true, 불일치 하면 false 반환
+        if (passwordEncoder.matches(loginDTO.getPassword(), userEntity.getPassword()) == false) {
+            throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다");
+        }
+        // 기존 샘플 데이터로 회원가입된 사용자들로는 로그인을 못 함 !!
         return userEntity;
     }
 
@@ -100,10 +225,10 @@ public class UserService {
     // 3. 엔티티 상태 변경 (더티 체킹)
     // 4. 트랜잭션이 일어나고 변경 된 User 엔티티 반환
     @Transactional
-    public User 회원정보수정(UserRequest.UpdateDTO updateDTO, Long userId ) {
+    public User 회원정보수정(UserRequest.UpdateDTO updateDTO, Long userId) {
         User userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
-        if(!userEntity.isOwner(userId))  {
+        if (!userEntity.isOwner(userId)) {
             throw new Exception403("회원 정보 수정 권한이 없습니다");
         }
 
@@ -122,9 +247,9 @@ public class UserService {
 
             // 2. 새 이미지 저장
             try {
-                String newProfileImageFilename = FileUtil.saveFile(updateDTO.getProfileImage());
+                String newProfileImageFileName = FileUtil.saveFile(updateDTO.getProfileImage());
                 // 새로 만들어진 파일 이름을 잠시 DTO에 보관 함
-                updateDTO.setProfileImageFilename(newProfileImageFilename);
+                updateDTO.setProfileImageFileName(newProfileImageFileName);
 
                 if(oldProfileImage != null && !oldProfileImage.isEmpty()) {
                     // 기존에 있던 이미지를 삭제 처리 한다.
@@ -136,10 +261,14 @@ public class UserService {
             // end of 파일이 들어 왔을 때 처리
         } else {
             // 새 이미지가 업로드 되지 않았으면 기존 이미지 파일 이름 유지
-            updateDTO.setProfileImageFilename(oldProfileImage);
+            updateDTO.setProfileImageFileName(oldProfileImage);
         }
         // 객체 상태값 변경 (트랜잭션이 끝나면 자동으로 commit 및 반영해 줄꺼야)
 
+        // 비밀번호 암호화 처리
+        String hashPwd = passwordEncoder.encode(updateDTO.getPassword());
+        updateDTO.setPassword(hashPwd);
+        // 객체 상태값 변경 (트랜잭션이 끝나면 자동으로 commit 및 반영해 줄꺼야)
         userEntity.update(updateDTO);
 
         return userEntity;
@@ -164,10 +293,10 @@ public class UserService {
         // 3. 프로필 이미지가 있다면 삭제 (FileUtil) 헬퍼 클래스 사용 할 예정 (디스크에서 삭제)
         // 4. DB 에서 프로필 이름 null 로 업데이트 처리
         User userEntity = userRepository.findById(sessionUserId)
-                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
 
         if (!userEntity.isOwner(sessionUserId)) {
-            throw new Exception403("프로필 이미지 삭제 권한이 없습니다.");
+            throw new Exception403("프로필 이미지 삭제 권한이 없습니다");
         }
 
         String profileImage = userEntity.getProfileImage();
@@ -175,24 +304,23 @@ public class UserService {
             try {
                 FileUtil.deleteFile(profileImage);
             } catch (IOException e) {
-                System.out.println("프로필 이미지 파일 삭제 실패");
+                System.err.println("프로필 이미지 파일 삭제 실패");
             }
         }
 
-        // 객체 상태값 변경 (트랜잭션 끝나는 시점 더티 체킹)
+        // 객체 상태값 변경 (트랜 잭션이 끝나는 시점 더티 체킹 된)
         userEntity.setProfileImage(null);
 
         return userEntity;
-
     }
 
     public User 사용자이름조회(String username) {
         // 사용자 이름 여부만 조회 하는 기능
-        return userRepository.findByUsername(username)
-                .orElse(null);
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     public void 소셜회원가입(User user) {
         userRepository.save(user);
     }
+
 }

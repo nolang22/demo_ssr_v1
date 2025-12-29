@@ -1,6 +1,7 @@
 package org.example.demo_ssr_v1.user;
 
 import lombok.Data;
+import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequest {
@@ -63,7 +64,7 @@ public class UserRequest {
     public static class UpdateDTO {
         private String password;
         private MultipartFile profileImage; // form 에 name속성 이름과 동일해야 함
-        private String profileImageFilename; // 추후  user.update 메서드에서 사용 함
+        private String profileImageFileName; // 추후  user.update 메서드에서 사용 함
 
         // username 은 제외: 변경 불가는한 고유 식별자
 
@@ -74,6 +75,23 @@ public class UserRequest {
 
             if(password.length() < 4) {
                 throw new IllegalArgumentException("비밀번호는 4글자 이상이어야 합니다");
+            }
+        }
+    }
+
+    @Data
+    public static class EmailCheckDTO {
+        private String email;
+        private String code;
+        // 추후 이메일 인증번호도 추가할 예정
+
+        public void validate() {
+            if (email == null || email.trim().isEmpty()) {
+                // Exception400 추후 수정
+                throw new Exception400("이메일을 입력해주세요");
+            }
+            if (!email.contains("@")) {
+                throw new Exception400("올바른 이메일 형식이 아닙니다.");
             }
         }
     }
