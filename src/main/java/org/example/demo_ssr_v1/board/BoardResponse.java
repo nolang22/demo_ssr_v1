@@ -47,20 +47,26 @@ public class BoardResponse {
         private Long userId;
         private String username;
         private String createdAt;
+        private Boolean Premium;
+        private Boolean isPurchased;
+        // 로그인한 사용자가 이 게시글을 구매 했는지 확인 여부 (단, 작성자는 제외)
 
-        public DetailDTO(Board board) {
+        public DetailDTO(Board board, Boolean isPurchased) {
             this.id = board.getId();
             this.title = board.getTitle();
             this.content = board.getContent();
-            //JOIN FETCH 활용 (한번에 JOIN 에서 Repository 에서 가지고 올 예정
-            if (board.getUser() != null) {
+            // JOIN FETCH 활용 (한번에 JOIN 에서 Repository 에서 가지고 올 예정)
+            if(board.getUser() != null) {
                 this.userId = board.getUser().getId();
                 this.username = board.getUser().getUsername();
             }
-
-            if (board.getCreatedAt() != null) {
+            // 날짜 포맷팅
+            if(board.getCreatedAt() != null) {
                 this.createdAt = MyDateUtil.timestampFormat(board.getCreatedAt());
             }
+            // 구매 여부 추가
+            this.Premium = board.getPremium();
+            this.isPurchased = isPurchased;
         }
     }
 

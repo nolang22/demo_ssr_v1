@@ -16,6 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 쿼리 메서드 네이밍 (자동 쿼리 생성)
     Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 
 //    Optional<User> findByUsernameAndPassword(String username, String password);
 
