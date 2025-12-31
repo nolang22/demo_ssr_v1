@@ -33,13 +33,6 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
-
-    @Value("${oauth.kakao.client-id}")
-    private String clientId;
-
-    @Value("${tenco.key}")
-    private String tencoKey;
 
 //    //TODO 테스트용 코드 - 삭제 에정
 //    @PostConstruct
@@ -48,6 +41,16 @@ public class UserController {
 //        System.out.println("현재 적용된 나의 시크릿 키 확인 " + tencoKey);
 //
 //    }
+
+    // /user/point/charge
+    @GetMapping("/user/point/charge")
+    public String chargePointForm(Model model, HttpSession session) {
+
+        User sessionUser = (User) session.getAttribute("sessionUser");
+
+        model.addAttribute("user", sessionUser);
+        return "/user/charge-point";
+    }
 
     // [흐름] 1. 인가코드받기 -> 2. 토큰 발급 요청 (JWT) -> 3. JWT 으로 사용자 정보 요청 -> 4. 우리 서버에 로그인/ 회원가입 처리
     @GetMapping("/user/kakao")

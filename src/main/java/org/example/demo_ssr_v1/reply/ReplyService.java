@@ -28,7 +28,7 @@ public class ReplyService {
      * OSIV 대응하기 위해 DTO 설계, 계층간 결함도를 줄이기 위해 설계
      * - JOIN FETCH로 한번에 User를 들고 왔다.
      */
-    public List<ReplyResponse.ListDTO> 댓글목록조회(Long boardId, Long sessionUserId) {
+    public List<ReplyResponse.ListDTO>댓글목록조회(Long boardId, Long sessionUserId) {
 
         // 조회 했기 때문에 1차 캐쉬에 들어간 상태 -> 즉 영속화 되어 있음
         List<Reply> replyList = replyRepository.findByBoardIdWithUser(boardId);
