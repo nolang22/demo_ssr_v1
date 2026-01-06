@@ -1,9 +1,11 @@
 package org.example.demo_ssr_v1.payment;
 
+import org.example.demo_ssr_v1.purchase.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -21,4 +23,14 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
 
     Optional<Payment> findByImpUid(String impUid);
+
+    @Query("""
+        SELECT p FROM Payment p
+        JOIN FETCH p.user
+        WHERE p.user.id = :userId
+        ORDER BY p.createdAt DESC 
+""")
+    List<Payment> findAllByUserId(@Param("userId") Long userId);
+
+
 }

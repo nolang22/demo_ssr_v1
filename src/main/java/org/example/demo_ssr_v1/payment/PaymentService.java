@@ -3,6 +3,8 @@ package org.example.demo_ssr_v1.payment;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
+import org.example.demo_ssr_v1.purchase.Purchase;
+import org.example.demo_ssr_v1.purchase.PurchaseResponse;
 import org.example.demo_ssr_v1.user.User;
 import org.example.demo_ssr_v1.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -168,5 +171,15 @@ public class PaymentService {
         }
 
         // TODO - 반드시 응답 값 수정
+    }
+
+    // 결제 내역 조회 (세션유저 기준)
+    public List<PaymentResponse.PointListDTO> 결제내역조회(Long userId) {
+        List<Payment> paymentList = paymentRepository.findAllByUserId(userId);
+
+        // TODO 트랜내에서 엔티티를 DTO로 변환
+        return paymentList.stream()
+                .map(PaymentResponse.PointListDTO::new)
+                .toList();
     }
 }
