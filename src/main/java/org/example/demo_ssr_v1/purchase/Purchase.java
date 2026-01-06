@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1.board.Board;
 import org.example.demo_ssr_v1.user.User;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,7 +36,7 @@ public class Purchase {
     private Integer price;
 
     @CreationTimestamp
-    private Timestamp timestamp;
+    private Timestamp createdAt;
 
     @Builder
     public Purchase(User user, Board board, Integer price) {

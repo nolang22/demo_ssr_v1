@@ -3,6 +3,8 @@ package org.example.demo_ssr_v1.user;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception401;
+import org.example.demo_ssr_v1.purchase.PurchaseResponse;
+import org.example.demo_ssr_v1.purchase.PurchaseService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -33,11 +36,17 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final PurchaseService purchaseService;
 
     // /user/purchase/list
     @GetMapping("/user/purchase/list")
     public String purchaseList(Model model, HttpSession session) {
-        
+
+        User sessionuser = (User) session.getAttribute("sessionUser");
+        List<PurchaseResponse.ListDTO> purchaseList = purchaseService.구매내역조회(sessionuser.getId());
+
+        model.addAttribute("purchaseList", purchaseList);
+
         return "user/purchase-list";
     }
 
