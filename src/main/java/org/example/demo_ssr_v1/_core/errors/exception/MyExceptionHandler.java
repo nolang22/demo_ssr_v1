@@ -36,7 +36,6 @@ public class MyExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .contentType(MediaType.TEXT_HTML)
                 .body(script);
-
     }
 
     // 401 인증 오류

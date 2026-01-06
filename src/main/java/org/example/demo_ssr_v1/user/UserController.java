@@ -34,13 +34,12 @@ public class UserController {
 
     private final UserService userService;
 
-//    //TODO 테스트용 코드 - 삭제 에정
-//    @PostConstruct
-//    public void init() {
-//        System.out.println("현재 적용된 카카오 클라이언트 키 확인 " + clientId);
-//        System.out.println("현재 적용된 나의 시크릿 키 확인 " + tencoKey);
-//
-//    }
+    // /user/purchase/list
+    @GetMapping("/user/purchase/list")
+    public String purchaseList(Model model, HttpSession session) {
+        
+        return "user/purchase-list";
+    }
 
     // /user/point/charge
     @GetMapping("/user/point/charge")
