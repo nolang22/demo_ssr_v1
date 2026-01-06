@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.demo_ssr_v1.user.User;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
 
 import java.sql.Timestamp;
 
@@ -42,7 +41,7 @@ public class Payment {
     private String status;
 
     @CreationTimestamp
-    private Timestamp timestamp;
+    private Timestamp createdAt;
 
     @Builder
     public Payment(Long id, String impUid, String merchantUid, User user, Integer amount, String status, Timestamp timestamp) {
@@ -52,6 +51,6 @@ public class Payment {
         this.user = user;
         this.amount = amount;
         this.status = status;
-        this.timestamp = timestamp;
+        this.createdAt = timestamp;
     }
 }
