@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
+import org.example.demo_ssr_v1._core.utiles.MyDateUtil;
 
 public class PaymentResponse {
 
@@ -65,6 +66,34 @@ public class PaymentResponse {
             private String merchantUid;
             private String status;
             private Long paidAt;
+        }
+    }
+
+    @Data
+    public static class PointListDTO {
+        private Long id;
+        private Integer amount;
+        private String merchantUid;
+        private String impUid;
+        private String paymentedAt;
+        private String status;
+
+        public PointListDTO(Payment payment) {
+            this.id = payment.getId();
+            this.amount = payment.getAmount();
+            this.merchantUid = payment.getMerchantUid();
+            this.impUid = payment.getImpUid();
+
+            if (payment.getStatus().equals("paid")) {
+                this.status = "결제 완료";
+            } else {
+                this.status = "환불 완료";
+            }
+
+            // 내가 구매한 일시 포맥팅
+            if (payment.getCreatedAt() != null) {
+                this.paymentedAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
+            }
         }
     }
 
