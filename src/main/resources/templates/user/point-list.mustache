@@ -24,14 +24,19 @@
                                     <i class="fa-solid fa-key"></i>결제번호: {{impUid}}
                                 </p>
                                 <p class="text-muted mb-2">
-                                    <i class="fa-solid fa-calendar-days"></i>결제일: {{paymentedAt}}
+                                    <i class="fa-solid fa-calendar-days"></i>결제일: {{paidAt}}
                                 </p>
                                 <p class="text-muted mb-2">
-                                    <i class="fas fa-user"></i>상태: <span class="bg-success rounded" style="border-radius:5px; color: white">{{status}}</span>
+                                    <i class="fas fa-user"></i>상태: <span class="bg-success rounded" style="border-radius:5px; color: white">{{statusDisplay}}</span>
                                 </p>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-primary fs-6">+{{amount}}P</span>
+                                <span class="badge bg-primary fs-6 mb-2">+{{amount}}P</span>
+                            {{#isRefundable}}
+                                <div>
+                                    <a href="/refund/request/1" class="btn btn-outline-danger btn-sm">환불하기</a>
+                                </div>
+                            {{/isRefundable}}
                             </div>
                         </div>
                     </div>

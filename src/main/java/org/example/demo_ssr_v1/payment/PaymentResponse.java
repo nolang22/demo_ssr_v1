@@ -3,7 +3,6 @@ package org.example.demo_ssr_v1.payment;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
-import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.utiles.MyDateUtil;
 
 public class PaymentResponse {
@@ -75,24 +74,29 @@ public class PaymentResponse {
         private Integer amount;
         private String merchantUid;
         private String impUid;
-        private String paymentedAt;
+        private String paidAt;
         private String status;
+        private String statusDisplay;
 
-        public PointListDTO(Payment payment) {
+        private Boolean isRefundable; // 환불 가능 여부 (화면에 표시 여부)
+
+
+        public PointListDTO(Payment payment, Boolean isRefundable) {
             this.id = payment.getId();
             this.amount = payment.getAmount();
             this.merchantUid = payment.getMerchantUid();
             this.impUid = payment.getImpUid();
+            this.isRefundable = isRefundable != null ? isRefundable : false;
 
             if (payment.getStatus().equals("paid")) {
-                this.status = "결제 완료";
+                this.statusDisplay = "결제완료";
             } else {
-                this.status = "환불 완료";
+                this.statusDisplay = "환불완료";
             }
 
             // 내가 구매한 일시 포맥팅
             if (payment.getCreatedAt() != null) {
-                this.paymentedAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
+                this.paidAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
             }
         }
     }
