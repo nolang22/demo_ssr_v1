@@ -14,7 +14,6 @@
                         <div class="d-flex justify-content-between">
                             <div class="flex-grow-1">
                                 <h5 class="card-title mb-2">
-                                    <!-- 추후 실제 게시글 상세보기 화면으로 이동-->
                                     결제 #{{id}}
                                 </h5>
                                 <p class="text-muted mb-2">
@@ -34,7 +33,7 @@
                                 <span class="badge bg-primary fs-6 mb-2">+{{amount}}P</span>
                             {{#isRefundable}}
                                 <div>
-                                    <a href="/refund/request/1" class="btn btn-outline-danger btn-sm">환불하기</a>
+                                    <a href="/refund/request/{{id}}" class="btn btn-outline-danger btn-sm">환불하기</a>
                                 </div>
                             {{/isRefundable}}
                             </div>
@@ -52,6 +51,9 @@
                 </div>
             {{/paymentList}}
             <div class="mt-4">
+                <a href="/refund/list" class="btn btn-info">
+                    <i class="fas fa-undo"></i>환불 요청 내역
+                </a>
                 <a href="/user/detail" class="btn btn-secondary">회원정보로 돌아가기</a>
             </div>
         </div>

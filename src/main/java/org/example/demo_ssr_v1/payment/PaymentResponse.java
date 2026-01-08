@@ -99,6 +99,11 @@ public class PaymentResponse {
                 this.paidAt = MyDateUtil.timestampFormat(payment.getCreatedAt());
             }
         }
+
+        public PointListDTO(Payment payment) {
+            //  [] ,  *(true, false)
+            this(payment, "paid".equals(payment.getStatus()));
+        }
     }
 
 

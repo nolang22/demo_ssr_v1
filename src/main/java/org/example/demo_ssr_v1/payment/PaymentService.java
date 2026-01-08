@@ -3,8 +3,6 @@ package org.example.demo_ssr_v1.payment;
 import lombok.RequiredArgsConstructor;
 import org.example.demo_ssr_v1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1._core.errors.exception.Exception404;
-import org.example.demo_ssr_v1.purchase.Purchase;
-import org.example.demo_ssr_v1.purchase.PurchaseResponse;
 import org.example.demo_ssr_v1.refund.RefundRequest;
 import org.example.demo_ssr_v1.refund.RefundRequestRepository;
 import org.example.demo_ssr_v1.user.User;
@@ -186,7 +184,7 @@ public class PaymentService {
                 .map(payment -> {
                     // 환불 요청 조회
                     // 결제 PS 값으로 환불 테이블에 이력이 있는지 없는지 조회
-                    Optional<RefundRequest> refundRequestOpt = refundRequestRepository.findBypaymentId(payment.getId());
+                    Optional<RefundRequest> refundRequestOpt = refundRequestRepository.findByPaymentId(payment.getId());
 
                     // 환불 요청이 있는 경우 상태 확인
                     // 요청이 있으면 true --> 화면에는 환불 요청 버튼 보이면 안됨.

@@ -21,5 +21,5 @@ public interface RefundRequestRepository extends JpaRepository<RefundRequest, Lo
     List<RefundRequest> findAllByUserId(@Param("userId") Long userId);
 
     // 결제 ID로 환불 요청 조회 여부 확인
-    Optional<RefundRequest> findBypaymentId(Long paymentId);
+    Optional<RefundRequest> findByPaymentId(@Param("id") Long paymentId);
 }

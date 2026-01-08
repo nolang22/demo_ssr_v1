@@ -1,6 +1,5 @@
 package org.example.demo_ssr_v1.payment;
 
-import org.example.demo_ssr_v1.purchase.Purchase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,5 +31,11 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 """)
     List<Payment> findAllByUserId(@Param("userId") Long userId);
 
-
+    // 추가
+    @Query("""
+          SELECT p from Payment p 
+          JOIN FETCH p.user u
+          WHERE p.id = :id
+    """)
+    Payment findByIdWithUser(@Param("id") Long paymentId);
 }
