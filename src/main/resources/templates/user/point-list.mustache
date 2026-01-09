@@ -33,7 +33,9 @@
                                 <span class="badge bg-primary fs-6 mb-2">+{{amount}}P</span>
                             {{#isRefundable}}
                                 <div>
-                                    <a href="/refund/request/{{id}}" class="btn btn-outline-danger btn-sm">환불하기</a>
+                                    {{#isStatus}}
+                                        <a href="/refund/request/{{id}}" class="btn btn-outline-danger btn-sm">환불하기</a>
+                                    {{/isStatus}}
                                 </div>
                             {{/isRefundable}}
                             </div>

@@ -12,14 +12,32 @@ public interface RefundRequestRepository extends JpaRepository<RefundRequest, Lo
     // 서용자 ID로 환불 요청 목록 조회 (최신순)
     // N + 1 방지를 위해서 한번에 JOIN FETCH를 사용해서 User를가져올 예정
     @Query("""
-    SELECT r FROM RefundRequest r
-    JOIN FETCH r.payment p
-    JOIN FETCH p.user u
-    WHERE r.user.id = :userId
-    ORDER BY r.createdAt DESC
-""")
+                SELECT r FROM RefundRequest r
+                JOIN FETCH r.payment p
+                JOIN FETCH p.user u
+                WHERE r.user.id = :userId
+                ORDER BY r.createdAt DESC
+            """)
     List<RefundRequest> findAllByUserId(@Param("userId") Long userId);
 
     // 결제 ID로 환불 요청 조회 여부 확인
     Optional<RefundRequest> findByPaymentId(@Param("id") Long paymentId);
+
+    // 전체 환불 요청 조회 (관리자용, 최신순)
+    @Query("""
+                SELECT r FROM RefundRequest r
+                JOIN FETCH r.payment p
+                JOIN FETCH r.user u
+                ORDER BY r.createdAt DESC 
+            """)
+    List<RefundRequest> findAllWithUserAndPayment();
+
+
+    @Query("""
+                SELECT r FROM RefundRequest r
+                JOIN FETCH r.payment p
+                JOIN FETCH r.user u
+                WHERE r.id = :id
+            """)
+    Optional<RefundRequest> findByIdWithUserAndPayment(@Param("id") Long id);
 }

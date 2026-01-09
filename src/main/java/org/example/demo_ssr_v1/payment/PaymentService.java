@@ -97,7 +97,7 @@ public class PaymentService {
 
     private PaymentResponse.PortOnePaymentResponse.PaymentData 포트원결제조회(String impUid, String merchantUid) {
         // 1. 액세스 토큰 발급
-        String accessToken = 포트원엑세스토큰발급();
+        String accessToken = 포트원액세스토큰발급();
 
         // 2. 포트원 자원서버에 결제 정보 조회 요청
         try {
@@ -136,7 +136,7 @@ public class PaymentService {
         }
     }
 
-    private String 포트원엑세스토큰발급() {
+    private String 포트원액세스토큰발급() {
         try {
             // https://api.iamport.kr/users/getToken
             RestTemplate restTemplate = new RestTemplate();

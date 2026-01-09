@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import org.example.demo_ssr_v1._core.utiles.MyDateUtil;
+import org.example.demo_ssr_v1.refund.RefundStatus;
 
 public class PaymentResponse {
 
@@ -79,6 +80,8 @@ public class PaymentResponse {
         private String statusDisplay;
 
         private Boolean isRefundable; // 환불 가능 여부 (화면에 표시 여부)
+        private Boolean isStatus;
+
 
 
         public PointListDTO(Payment payment, Boolean isRefundable) {
@@ -93,6 +96,8 @@ public class PaymentResponse {
             } else {
                 this.statusDisplay = "환불완료";
             }
+
+            this.isStatus = (payment.getStatus() == "cancelled");
 
             // 내가 구매한 일시 포맥팅
             if (payment.getCreatedAt() != null) {
